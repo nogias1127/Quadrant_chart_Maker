@@ -150,8 +150,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupThemeSelect();
   bindEvents();
   syncControlsFromState();
-  await loadCurrentFonts();
+
   render();
+
+  try {
+    await loadCurrentFonts();
+    render();
+  } catch (error) {
+    console.warn("初期フォント読み込みに失敗しました。", error);
+  }
 });
 
 function bindElements() {
@@ -552,20 +559,66 @@ function drawAutoFitTitle(svg) {
 
 function calculateAutoFitLines({ text, maxWidth, maxHeight, baseSize, minSize, lineHeight }) {
   const normalizedText = String(text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  let firstHeightFit = null;
 
   for (let size = baseSize; size >= minSize; size -= 1) {
     const lines = wrapTextToWidth(normalizedText, maxWidth, size);
     const totalHeight = lines.length * size * lineHeight;
 
-    if (totalHeight <= maxHeight) {
+    if (totalHeight > maxHeight) {
+      continue;
+    }
+
+    if (!firstHeightFit) {
+      firstHeightFit = { lines, size };
+    }
+
+    if (!hasOneCharLastLine(lines)) {
       return { lines, size };
     }
   }
 
+  if (firstHeightFit) {
+    return {
+      lines: rebalanceOneCharLastLine(firstHeightFit.lines),
+      size: firstHeightFit.size
+    };
+  }
+
+  const minLines = wrapTextToWidth(normalizedText, maxWidth, minSize);
+
   return {
-    lines: wrapTextToWidth(normalizedText, maxWidth, minSize),
+    lines: rebalanceOneCharLastLine(minLines),
     size: minSize
   };
+}
+
+function hasOneCharLastLine(lines) {
+  if (!Array.isArray(lines) || lines.length <= 1) return false;
+
+  const lastLine = lines[lines.length - 1] || "";
+  const lastChars = [...lastLine.trim()];
+
+  return lastChars.length === 1;
+}
+
+function rebalanceOneCharLastLine(lines) {
+  if (!hasOneCharLastLine(lines)) return lines;
+
+  const result = [...lines];
+  const lastIndex = result.length - 1;
+  const previousLine = result[lastIndex - 1] || "";
+  const previousChars = [...previousLine];
+
+  if (previousChars.length <= 1) {
+    return result;
+  }
+
+  const movedChar = previousChars.pop();
+  result[lastIndex - 1] = previousChars.join("");
+  result[lastIndex] = movedChar + result[lastIndex];
+
+  return result;
 }
 
 function wrapTextToWidth(text, maxWidth, fontSize) {
