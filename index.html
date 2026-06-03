@@ -21,14 +21,30 @@
   <main class="app-layout">
     <aside class="control-panel">
       <section class="panel-card">
-
+        <h2>STEP 01.表示内容を入力する</h2>
         <label>
-          テーマ
+          ■テーマカラー
           <select id="themeSelect"></select>
         </label>
 
         <label>
-          タイトル用フォント
+          ■バックグラウンドカラー
+          <input id="bgColorInput" type="color">
+        </label>
+        
+        <div class="two-cols">
+          <label>
+          ■タイトルテキストカラー
+            <input id="titleColorInput" type="color">
+          </label>
+          <label>
+          ■ラベルテキストカラー
+            <input id="labelColorInput" type="color">
+          </label>
+        </div>
+        
+        <label>
+          ■タイトルフォント
           <select id="titleFontSelect">
             <option value="dela">Dela Gothic One / 極太</option>
             <option value="mochiy">Mochiy Pop One / ポップ極太</option>
@@ -44,7 +60,7 @@
         </label>
 
         <label>
-          ラベル・配置文字用フォント
+          ■ラベル・配置文字フォント
           <select id="bodyFontSelect">
             <option value="rounded">M PLUS Rounded 1c / 丸ゴシック</option>
             <option value="kiwi">Kiwi Maru / ゆる丸</option>
@@ -60,70 +76,55 @@
         </label>
     
         <label>
-          背景色
-          <input id="bgColorInput" type="color">
-        </label>
-
-        <div class="two-cols">
-          <label>
-            タイトル色
-            <input id="titleColorInput" type="color">
-          </label>
-          <label>
-            ラベル色
-            <input id="labelColorInput" type="color">
-          </label>
-        </div>
-
-        <label>
-          タイトル
+          ■タイトル
           <input id="titleInput" type="text" value="かに">
         </label>
 
-        <div class="two-cols">
+        <label>
+          ■上ラベル
+          <input id="topLabelInput" type="text" value="めちゃくちゃ喋る">
+        </label>
+        <label>
+          ■下ラベル
+          <input id="bottomLabelInput" type="text" value="静かになる">
+        </label>
+        <label>
+          ■左ラベル
+          <input id="leftLabelInput" type="text" value="剥くのが上手い">
+        </label>
+        <label>
+          ■右ラベル
+          <input id="rightLabelInput" type="text" value="剥くのが下手">
+        </label>
+      </section>
+      
+      　<div class="two-cols">
           <label>
-            タイトルサイズ
+            □タイトルサイズ
             <input id="titleSizeInput" type="number" min="20" max="160" value="96">
           </label>
           <label>
-            ラベルサイズ
+            □ラベルサイズ
             <input id="labelSizeInput" type="number" min="12" max="80" value="34">
           </label>
         </div>
 
-        <label>
-          上ラベル
-          <input id="topLabelInput" type="text" value="めちゃくちゃ喋る">
-        </label>
-        <label>
-          下ラベル
-          <input id="bottomLabelInput" type="text" value="静かになる">
-        </label>
-        <label>
-          左ラベル
-          <input id="leftLabelInput" type="text" value="剥くのが上手い">
-        </label>
-        <label>
-          右ラベル
-          <input id="rightLabelInput" type="text" value="剥くのが下手">
-        </label>
-      </section>
-
       <section class="panel-card">
-        <h2>追加</h2>
+        <h2>STEP 02.自CP情報を書き込む</h2>
+        ※空欄にしたらプレーンな画像として出力できます
 
         <label>
-          追加する文字・絵文字
-          <input id="newTextInput" type="text" value="🦀">
+          ■追加するテキスト・絵文字
+          <input id="newTextInput" type="text" value="絵文字使えるよ🦀">
         </label>
 
         <div class="two-cols">
           <label>
-            文字サイズ
+            □テキストのサイズ
             <input id="newTextSizeInput" type="number" min="10" max="160" value="42">
           </label>
           <label>
-            文字色
+            □テキストカラー
             <input id="newTextColorInput" type="color" value="#222222">
           </label>
         </div>
@@ -138,17 +139,17 @@
         <hr>
 
         <label>
-          追加する画像
+          ■追加する画像
           <input id="imageInput" type="file" accept="image/*">
         </label>
 
         <div class="two-cols">
           <label>
-            初期幅
+            □初期幅
             <input id="newImageWidthInput" type="number" min="20" max="500" value="120">
           </label>
           <label>
-            初期高さ
+            □初期高さ
             <input id="newImageHeightInput" type="number" min="20" max="500" value="120">
           </label>
         </div>
@@ -159,23 +160,23 @@
       </section>
 
       <section class="panel-card">
-        <h2>選択中の要素</h2>
+        <h2>STEP03. 選択中の要素を変更する</h2>
 
         <p id="selectedInfo" class="hint">未選択です。</p>
 
         <div id="selectedTextControls" class="hidden">
           <label>
-            テキスト
+            □テキスト
             <input id="selectedTextInput" type="text">
           </label>
 
           <div class="two-cols">
             <label>
-              サイズ
+              □サイズ
               <input id="selectedTextSizeInput" type="number" min="10" max="180">
             </label>
             <label>
-              色
+              □カラー
               <input id="selectedTextColorInput" type="color">
             </label>
           </div>
@@ -189,18 +190,18 @@
         <div id="selectedImageControls" class="hidden">
           <div class="two-cols">
             <label>
-              幅
+              □幅
               <input id="selectedImageWidthInput" type="number" min="20" max="700">
             </label>
             <label>
-              高さ
+              □高さ
               <input id="selectedImageHeightInput" type="number" min="20" max="700">
             </label>
           </div>
         </div>
 
         <button id="deleteSelectedBtn" class="danger wide" disabled>選択中の要素を削除</button>
-        <button id="clearItemsBtn" class="wide">配置要素を全削除</button>
+        <button id="clearItemsBtn" class="wide">全削除</button>
       </section>
 
       <section class="panel-card">
@@ -211,8 +212,8 @@
           <li>プレビュー上の好きな場所をクリック/タップします。</li>
           <li>置いた要素はドラッグで動かせます。</li>
           <li>選択中の要素はサイズ変更・削除できます。</li>
-          <li>完成したらPNG保存します。</li>
-          <li>固定サイズ：768×1024 / PNGは2倍解像度で保存</li>
+          <li>完成したらPNGかSVGで保存します。</li>
+          <li>固定サイズ：768×1024 / PNGは2倍解像度で保存です</li>
         </ol>
       </section>
     </aside>
