@@ -2,33 +2,93 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const XLINK_NS = "http://www.w3.org/1999/xlink";
 
 const FONT_OPTIONS = {
-  rounded: {
-    name: "丸ゴシック / M PLUS Rounded",
-    stack: '"M PLUS Rounded 1c", system-ui, sans-serif'
-  },
-  zenMaru: {
-    name: "やわらか丸ゴ / Zen Maru Gothic",
-    stack: '"Zen Maru Gothic", "M PLUS Rounded 1c", system-ui, sans-serif'
-  },
-  kiwi: {
-    name: "ゆるめ / Kiwi Maru",
-    stack: '"Kiwi Maru", "M PLUS Rounded 1c", system-ui, sans-serif'
-  },
   dela: {
-    name: "極太タイトル / Dela Gothic One",
-    stack: '"Dela Gothic One", "M PLUS Rounded 1c", system-ui, sans-serif'
+    name: "Dela Gothic One / 極太",
+    family: "Dela Gothic One",
+    stack: '"Dela Gothic One", system-ui, sans-serif',
+    file: "fonts/DelaGothicOne-Regular.ttf",
+    format: "truetype",
+    weight: "900"
+  },
+  hachi: {
+    name: "Hachi Maru Pop / 手書きポップ",
+    family: "Hachi Maru Pop",
+    stack: '"Hachi Maru Pop", system-ui, sans-serif',
+    file: "fonts/HachiMaruPop-Regular.ttf",
+    format: "truetype",
+    weight: "400"
   },
   kaisei: {
-    name: "レトロ見出し / Kaisei Decol",
-    stack: '"Kaisei Decol", "M PLUS Rounded 1c", serif'
+    name: "Kaisei Decol / レトロ",
+    family: "Kaisei Decol",
+    stack: '"Kaisei Decol", serif',
+    file: "fonts/KaiseiDecol-Medium.ttf",
+    format: "truetype",
+    weight: "500"
   },
-  mincho: {
-    name: "明朝系 / serif",
-    stack: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif'
+  kiwi: {
+    name: "Kiwi Maru / ゆる丸",
+    family: "Kiwi Maru",
+    stack: '"Kiwi Maru", system-ui, sans-serif',
+    file: "fonts/KiwiMaru-Medium.ttf",
+    format: "truetype",
+    weight: "500"
+  },
+  rounded: {
+    name: "M PLUS Rounded 1c / 丸ゴシック",
+    family: "M PLUS Rounded 1c",
+    stack: '"M PLUS Rounded 1c", system-ui, sans-serif',
+    file: "fonts/MPLUSRounded1c-Medium.ttf",
+    format: "truetype",
+    weight: "500"
+  },
+  mochiy: {
+    name: "Mochiy Pop One / ポップ極太",
+    family: "Mochiy Pop One",
+    stack: '"Mochiy Pop One", system-ui, sans-serif',
+    file: "fonts/MochiyPopOne-Regular.ttf",
+    format: "truetype",
+    weight: "900"
+  },
+  rampart: {
+    name: "Rampart One / 装飾タイトル",
+    family: "Rampart One",
+    stack: '"Rampart One", system-ui, sans-serif',
+    file: "fonts/RampartOne-Regular.ttf",
+    format: "truetype",
+    weight: "400"
+  },
+  shippori: {
+    name: "Shippori Mincho / 明朝",
+    family: "Shippori Mincho",
+    stack: '"Shippori Mincho", serif',
+    file: "fonts/ShipporiMincho-Medium.ttf",
+    format: "truetype",
+    weight: "500"
+  },
+  yuji: {
+    name: "Yuji Boku / 筆文字",
+    family: "Yuji Boku",
+    stack: '"Yuji Boku", serif',
+    file: "fonts/YujiBoku-Regular.ttf",
+    format: "truetype",
+    weight: "400"
+  },
+  zenAntique: {
+    name: "Zen Antique Soft / レトロ明朝",
+    family: "Zen Antique Soft",
+    stack: '"Zen Antique Soft", serif',
+    file: "fonts/ZenAntiqueSoft-Regular.ttf",
+    format: "truetype",
+    weight: "400"
   },
   system: {
     name: "標準 / system",
-    stack: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif'
+    family: "system-ui",
+    stack: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif',
+    file: null,
+    format: null,
+    weight: "400"
   }
 };
 
@@ -81,13 +141,15 @@ let drag = null;
 let idCounter = 1;
 
 const els = {};
+const loadedFontKeys = new Set();
+const fontDataUrlCache = new Map();
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   bindElements();
   setupThemeSelect();
-  setupFontSelects();
   bindEvents();
   syncControlsFromState();
+  await loadCurrentFonts();
   render();
 });
 
@@ -138,6 +200,8 @@ function bindElements() {
 }
 
 function setupThemeSelect() {
+  if (!els.themeSelect || els.themeSelect.options.length > 0) return;
+
   for (const [key, theme] of Object.entries(THEMES)) {
     const option = document.createElement("option");
     option.value = key;
@@ -146,30 +210,18 @@ function setupThemeSelect() {
   }
 }
 
-function setupFontSelects() {
-  for (const [key, font] of Object.entries(FONT_OPTIONS)) {
-    const titleOption = document.createElement("option");
-    titleOption.value = key;
-    titleOption.textContent = font.name;
-    els.titleFontSelect.appendChild(titleOption);
-
-    const bodyOption = document.createElement("option");
-    bodyOption.value = key;
-    bodyOption.textContent = font.name;
-    els.bodyFontSelect.appendChild(bodyOption);
-  }
-}
-
 function bindEvents() {
   els.themeSelect.addEventListener("change", applyTheme);
 
-  els.titleFontSelect.addEventListener("change", () => {
+  els.titleFontSelect.addEventListener("change", async () => {
     state.titleFont = els.titleFontSelect.value;
+    await loadCurrentFonts();
     render();
   });
 
-  els.bodyFontSelect.addEventListener("change", () => {
+  els.bodyFontSelect.addEventListener("change", async () => {
     state.bodyFont = els.bodyFontSelect.value;
+    await loadCurrentFonts();
     render();
   });
 
@@ -359,6 +411,35 @@ function applyTheme() {
   render();
 }
 
+async function loadCurrentFonts() {
+  await Promise.all([
+    loadFontForKey(state.titleFont),
+    loadFontForKey(state.bodyFont)
+  ]);
+
+  if (document.fonts && document.fonts.ready) {
+    await document.fonts.ready;
+  }
+}
+
+async function loadFontForKey(key) {
+  const font = FONT_OPTIONS[key];
+  if (!font || !font.file || loadedFontKeys.has(key) || !("FontFace" in window)) return;
+
+  try {
+    const face = new FontFace(font.family, `url("${font.file}") format("${font.format}")`, {
+      weight: font.weight || "400",
+      style: "normal"
+    });
+
+    const loaded = await face.load();
+    document.fonts.add(loaded);
+    loadedFontKeys.add(key);
+  } catch (error) {
+    console.warn(`フォントを読み込めませんでした: ${font.file}`, error);
+  }
+}
+
 function handleImageInput(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
@@ -443,7 +524,7 @@ function drawAutoFitTitle(svg) {
   text.setAttribute("y", TITLE_BOX.y + TITLE_BOX.height / 2 - ((fit.lines.length - 1) * fit.size * TITLE_BOX.lineHeight) / 2);
   text.setAttribute("fill", state.title.color);
   text.setAttribute("font-size", fit.size);
-  text.setAttribute("font-weight", "900");
+  text.setAttribute("font-weight", getFontWeight(state.titleFont));
   text.setAttribute("font-family", getFontStack("title"));
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("dominant-baseline", "middle");
@@ -792,6 +873,10 @@ function getFontStack(kind) {
   return FONT_OPTIONS[key]?.stack || FONT_OPTIONS.system.stack;
 }
 
+function getFontWeight(key) {
+  return FONT_OPTIONS[key]?.weight || "800";
+}
+
 function drawText(parent, config) {
   const text = createSvgElement("text");
   text.textContent = config.text;
@@ -799,7 +884,7 @@ function drawText(parent, config) {
   text.setAttribute("y", config.y);
   text.setAttribute("fill", config.color);
   text.setAttribute("font-size", config.size);
-  text.setAttribute("font-weight", "800");
+  text.setAttribute("font-weight", getFontWeight(state.bodyFont));
   text.setAttribute("font-family", getFontStack("body"));
   text.setAttribute("text-anchor", config.anchor || "middle");
   text.setAttribute("dominant-baseline", "middle");
@@ -814,7 +899,7 @@ function drawVerticalText(parent, config) {
   text.setAttribute("y", config.y);
   text.setAttribute("fill", config.color);
   text.setAttribute("font-size", config.size);
-  text.setAttribute("font-weight", "800");
+  text.setAttribute("font-weight", getFontWeight(state.bodyFont));
   text.setAttribute("font-family", getFontStack("body"));
   text.setAttribute("text-anchor", config.anchor || "middle");
   text.setAttribute("dominant-baseline", "middle");
@@ -867,7 +952,9 @@ function removeAllChildren(node) {
   }
 }
 
-function prepareSvgString() {
+async function prepareSvgString() {
+  await loadCurrentFonts();
+
   const currentSelected = selectedId;
   selectedId = null;
   render();
@@ -878,6 +965,16 @@ function prepareSvgString() {
   clone.setAttribute("width", CANVAS.width);
   clone.setAttribute("height", CANVAS.height);
 
+  const fontCss = await buildEmbeddedFontCss();
+  if (fontCss) {
+    const defs = createSvgElement("defs");
+    const style = createSvgElement("style");
+    style.setAttribute("type", "text/css");
+    style.textContent = fontCss;
+    defs.appendChild(style);
+    clone.insertBefore(defs, clone.firstChild);
+  }
+
   const serializer = new XMLSerializer();
   const svgString = serializer.serializeToString(clone);
 
@@ -887,8 +984,65 @@ function prepareSvgString() {
   return `<?xml version="1.0" encoding="UTF-8"?>\n${svgString}`;
 }
 
-function downloadSvg() {
-  const svgString = prepareSvgString();
+async function buildEmbeddedFontCss() {
+  const keys = Array.from(new Set([state.titleFont, state.bodyFont]));
+  const rules = [];
+
+  for (const key of keys) {
+    const font = FONT_OPTIONS[key];
+    if (!font || !font.file) continue;
+
+    try {
+      const dataUrl = await fetchFontAsDataUrl(font.file, font.format);
+      rules.push(`
+@font-face {
+  font-family: "${font.family}";
+  src: url("${dataUrl}") format("${font.format}");
+  font-weight: ${font.weight || "400"};
+  font-style: normal;
+}`);
+    } catch (error) {
+      console.warn(`保存用フォントを埋め込めませんでした: ${font.file}`, error);
+    }
+  }
+
+  return rules.join("\n");
+}
+
+async function fetchFontAsDataUrl(url, format) {
+  if (fontDataUrlCache.has(url)) {
+    return fontDataUrlCache.get(url);
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Font fetch failed: ${url}`);
+  }
+
+  const buffer = await response.arrayBuffer();
+  const base64 = arrayBufferToBase64(buffer);
+  const mime = format === "truetype" ? "font/ttf" : "font/woff2";
+  const dataUrl = `data:${mime};base64,${base64}`;
+
+  fontDataUrlCache.set(url, dataUrl);
+  return dataUrl;
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = "";
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+
+  return btoa(binary);
+}
+
+async function downloadSvg() {
+  const svgString = await prepareSvgString();
   const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   downloadBlob(blob, createFilename("svg"));
 }
@@ -898,7 +1052,7 @@ async function downloadPng() {
     await document.fonts.ready;
   }
 
-  const svgString = prepareSvgString();
+  const svgString = await prepareSvgString();
   const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(svgBlob);
   const image = new Image();
