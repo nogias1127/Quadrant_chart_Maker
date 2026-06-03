@@ -420,12 +420,29 @@ function applyTheme() {
   state.gridColor = theme.grid;
   state.title.color = theme.title;
 
+  if (theme.titleFont) {
+    state.titleFont = theme.titleFont;
+  }
+
+  if (theme.labelFont) {
+    state.labelFont = theme.labelFont;
+  }
+
+  if (theme.itemFont) {
+    state.itemFont = theme.itemFont;
+  }
+
   for (const label of Object.values(state.labels)) {
     label.color = theme.text;
   }
 
   syncControlsFromState();
-  render();
+  loadCurrentFonts().then(() => {
+    render();
+  }).catch((error) => {
+    console.warn("テーマ用フォントの読み込みに失敗しました。", error);
+    render();
+  });
 }
 
 async function loadCurrentFonts() {
