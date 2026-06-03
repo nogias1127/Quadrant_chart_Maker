@@ -1,1 +1,289 @@
+* {
+  box-sizing: border-box;
+}
 
+:root {
+  --ui-bg: #f5f6f8;
+  --panel-bg: #ffffff;
+  --text: #24292f;
+  --muted: #6e7781;
+  --border: #d0d7de;
+  --primary: #2f6feb;
+  --primary-hover: #1f5fd6;
+  --danger: #cf222e;
+  --danger-hover: #a40e26;
+  --focus: #0969da;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ui-bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+button.danger {
+  background: var(--danger);
+  color: #ffffff;
+  border-color: var(--danger);
+}
+
+button.danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+button.wide {
+  width: 100%;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #ffffff;
+  color: var(--text);
+}
+
+input[type="color"] {
+  min-height: 39px;
+  padding: 4px;
+}
+
+input[type="checkbox"] {
+  width: auto;
+}
+
+input:focus,
+select:focus,
+button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 25%, transparent);
+  border-color: var(--focus);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.app-header h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.app-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(27, 31, 36, 0.04);
+}
+
+.panel-card h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.panel-card label {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.check-row {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 8px !important;
+  font-weight: 500 !important;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 14px 0;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.help-list {
+  margin: 0;
+  padding-left: 1.25em;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.preview-area {
+  min-width: 0;
+}
+
+.preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 650;
+}
+
+.svg-shell {
+  width: min(100%, 860px);
+  margin: 0 auto;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(27, 31, 36, 0.08);
+}
+
+#chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  touch-action: none;
+  user-select: none;
+}
+
+.chart-item {
+  cursor: grab;
+}
+
+.chart-item:active {
+  cursor: grabbing;
+}
+
+.selection-box {
+  fill: none;
+  stroke: #0969da;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  pointer-events: none;
+}
+
+@media (max-width: 980px) {
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .control-panel {
+    order: 2;
+  }
+
+  .preview-area {
+    order: 1;
+  }
+
+  .svg-shell {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-layout {
+    padding: 10px;
+  }
+
+  .app-header {
+    padding: 14px;
+  }
+
+  .two-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

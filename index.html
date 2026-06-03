@@ -1,1 +1,203 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quadrant Chart Maker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Quadrant Chart Maker</h1>
+      <p>四象限画像をブラウザだけで作成できます。配置したい場所をクリック/タップして、文字・絵文字・画像を置けます。</p>
+    </div>
+    <div class="header-actions">
+      <button id="downloadPngBtn" class="primary">PNG保存</button>
+      <button id="downloadSvgBtn">SVG保存</button>
+    </div>
+  </header>
 
+  <main class="app-layout">
+    <aside class="control-panel">
+      <section class="panel-card">
+        <h2>テンプレート</h2>
+
+        <label>
+          テーマ
+          <select id="themeSelect"></select>
+        </label>
+
+        <label>
+          背景色
+          <input id="bgColorInput" type="color">
+        </label>
+
+        <div class="two-cols">
+          <label>
+            タイトル色
+            <input id="titleColorInput" type="color">
+          </label>
+          <label>
+            ラベル色
+            <input id="labelColorInput" type="color">
+          </label>
+        </div>
+
+        <label>
+          タイトル
+          <input id="titleInput" type="text" value="かに">
+        </label>
+
+        <div class="two-cols">
+          <label>
+            タイトルサイズ
+            <input id="titleSizeInput" type="number" min="20" max="160" value="96">
+          </label>
+          <label>
+            ラベルサイズ
+            <input id="labelSizeInput" type="number" min="12" max="80" value="34">
+          </label>
+        </div>
+
+        <label>
+          上ラベル
+          <input id="topLabelInput" type="text" value="めちゃくちゃ喋る">
+        </label>
+        <label>
+          下ラベル
+          <input id="bottomLabelInput" type="text" value="静かになる">
+        </label>
+        <label>
+          左ラベル
+          <input id="leftLabelInput" type="text" value="剥くのが上手い">
+        </label>
+        <label>
+          右ラベル
+          <input id="rightLabelInput" type="text" value="剥くのが下手">
+        </label>
+      </section>
+
+      <section class="panel-card">
+        <h2>追加</h2>
+
+        <label>
+          追加する文字・絵文字
+          <input id="newTextInput" type="text" value="🦀">
+        </label>
+
+        <div class="two-cols">
+          <label>
+            文字サイズ
+            <input id="newTextSizeInput" type="number" min="10" max="160" value="42">
+          </label>
+          <label>
+            文字色
+            <input id="newTextColorInput" type="color" value="#222222">
+          </label>
+        </div>
+
+        <label class="check-row">
+          <input id="newTextVerticalInput" type="checkbox">
+          <span>縦書きで追加</span>
+        </label>
+
+        <button id="addTextModeBtn" class="primary wide">文字を置く場所を選ぶ</button>
+
+        <hr>
+
+        <label>
+          追加する画像
+          <input id="imageInput" type="file" accept="image/*">
+        </label>
+
+        <div class="two-cols">
+          <label>
+            初期幅
+            <input id="newImageWidthInput" type="number" min="20" max="500" value="120">
+          </label>
+          <label>
+            初期高さ
+            <input id="newImageHeightInput" type="number" min="20" max="500" value="120">
+          </label>
+        </div>
+
+        <button id="addImageModeBtn" class="wide" disabled>画像を置く場所を選ぶ</button>
+
+        <p id="modeHint" class="hint">通常モード：要素をクリック/タップすると選択、ドラッグで移動できます。</p>
+      </section>
+
+      <section class="panel-card">
+        <h2>選択中の要素</h2>
+
+        <p id="selectedInfo" class="hint">未選択です。</p>
+
+        <div id="selectedTextControls" class="hidden">
+          <label>
+            テキスト
+            <input id="selectedTextInput" type="text">
+          </label>
+
+          <div class="two-cols">
+            <label>
+              サイズ
+              <input id="selectedTextSizeInput" type="number" min="10" max="180">
+            </label>
+            <label>
+              色
+              <input id="selectedTextColorInput" type="color">
+            </label>
+          </div>
+
+          <label class="check-row">
+            <input id="selectedTextVerticalInput" type="checkbox">
+            <span>縦書き</span>
+          </label>
+        </div>
+
+        <div id="selectedImageControls" class="hidden">
+          <div class="two-cols">
+            <label>
+              幅
+              <input id="selectedImageWidthInput" type="number" min="20" max="700">
+            </label>
+            <label>
+              高さ
+              <input id="selectedImageHeightInput" type="number" min="20" max="700">
+            </label>
+          </div>
+        </div>
+
+        <button id="deleteSelectedBtn" class="danger wide" disabled>選択中の要素を削除</button>
+        <button id="clearItemsBtn" class="wide">配置要素を全削除</button>
+      </section>
+
+      <section class="panel-card">
+        <h2>使い方</h2>
+        <ol class="help-list">
+          <li>テーマ・タイトル・軸ラベルを編集します。</li>
+          <li>文字か画像を選び、「置く場所を選ぶ」を押します。</li>
+          <li>プレビュー上の好きな場所をクリック/タップします。</li>
+          <li>置いた要素はドラッグで動かせます。</li>
+          <li>選択中の要素はサイズ変更・削除できます。</li>
+          <li>完成したらPNG保存します。</li>
+        </ol>
+      </section>
+    </aside>
+
+    <section class="preview-area">
+      <div class="preview-toolbar">
+        <span>プレビュー</span>
+        <span class="hint">固定サイズ：768×1024 / PNGは2倍解像度で保存</span>
+      </div>
+
+      <div class="svg-shell">
+        <svg id="chartSvg" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="四象限チャート編集エリア"></svg>
+      </div>
+    </section>
+  </main>
+
+  <script src="themes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
