@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Quadrant Chart Maker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Kaisei+Decol:wght@400;500;700&family=Kiwi+Maru:wght@400;500&family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="app-header">
@@ -33,12 +33,28 @@
 
         <label>
           タイトル用フォント
-          <select id="titleFontSelect"></select>
+          <select id="titleFontSelect">
+            <option value="dela">極太タイトル / Dela Gothic One</option>
+            <option value="rounded">丸ゴシック / M PLUS Rounded</option>
+            <option value="zenMaru">やわらか丸ゴ / Zen Maru Gothic</option>
+            <option value="kiwi">ゆるめ / Kiwi Maru</option>
+            <option value="kaisei">レトロ見出し / Kaisei Decol</option>
+            <option value="mincho">明朝系 / serif</option>
+            <option value="system">標準 / system</option>
+          </select>
         </label>
 
         <label>
           ラベル・配置文字用フォント
-          <select id="bodyFontSelect"></select>
+          <select id="bodyFontSelect">
+            <option value="rounded">丸ゴシック / M PLUS Rounded</option>
+            <option value="zenMaru">やわらか丸ゴ / Zen Maru Gothic</option>
+            <option value="kiwi">ゆるめ / Kiwi Maru</option>
+            <option value="dela">極太タイトル / Dela Gothic One</option>
+            <option value="kaisei">レトロ見出し / Kaisei Decol</option>
+            <option value="mincho">明朝系 / serif</option>
+            <option value="system">標準 / system</option>
+          </select>
         </label>
     
         <label>
