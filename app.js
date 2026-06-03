@@ -116,19 +116,20 @@ const DEFAULT_STATE = {
   panelColor: "#ffffff",
   gridColor: "#ef9aae",
   titleFont: "dela",
-  bodyFont: "rounded",
+  labelFont: "rounded",
+  itemFont: "rounded",
   title: {
-    text: "かに",
+    text: "好きなものマップ",
     x: 384,
     y: 136,
     size: 108,
     color: "#ffffff"
   },
   labels: {
-    top: { text: "めちゃくちゃ喋る", x: 384, y: 292, size: 34, color: "#ffffff", anchor: "middle" },
-    bottom: { text: "静かになる", x: 384, y: 1000, size: 34, color: "#ffffff", anchor: "middle" },
-    left: { text: "剥くのが上手い", x: 38, y: 636, size: 32, color: "#ffffff", anchor: "middle", vertical: true },
-    right: { text: "剥くのが下手", x: 732, y: 636, size: 32, color: "#ffffff", anchor: "middle", vertical: true }
+    top: { text: "かなり好き", x: 384, y: 292, size: 34, color: "#ffffff", anchor: "middle" },
+    bottom: { text: "まあまあ", x: 384, y: 1000, size: 34, color: "#ffffff", anchor: "middle" },
+    left: { text: "ひとりで楽しむ", x: 38, y: 636, size: 32, color: "#ffffff", anchor: "middle", vertical: true },
+    right: { text: "みんなで楽しむ", x: 732, y: 636, size: 32, color: "#ffffff", anchor: "middle", vertical: true }
   },
   items: []
 };
@@ -158,7 +159,8 @@ function bindElements() {
     "chartSvg",
     "themeSelect",
     "titleFontSelect",
-    "bodyFontSelect",
+    "labelFontSelect",
+    "itemFontSelect",
     "bgColorInput",
     "titleColorInput",
     "labelColorInput",
@@ -219,8 +221,14 @@ function bindEvents() {
     render();
   });
 
-  els.bodyFontSelect.addEventListener("change", async () => {
-    state.bodyFont = els.bodyFontSelect.value;
+  els.labelFontSelect.addEventListener("change", async () => {
+    state.labelFont = els.labelFontSelect.value;
+    await loadCurrentFonts();
+    render();
+  });
+
+  els.itemFontSelect.addEventListener("change", async () => {
+    state.itemFont = els.itemFontSelect.value;
     await loadCurrentFonts();
     render();
   });
@@ -379,7 +387,8 @@ function bindEvents() {
 function syncControlsFromState() {
   els.themeSelect.value = state.theme;
   els.titleFontSelect.value = state.titleFont;
-  els.bodyFontSelect.value = state.bodyFont;
+  els.labelFontSelect.value = state.labelFont;
+  els.itemFontSelect.value = state.itemFont;
   els.bgColorInput.value = state.backgroundColor;
   els.titleColorInput.value = state.title.color;
   els.labelColorInput.value = state.labels.top.color;
@@ -414,7 +423,8 @@ function applyTheme() {
 async function loadCurrentFonts() {
   await Promise.all([
     loadFontForKey(state.titleFont),
-    loadFontForKey(state.bodyFont)
+    loadFontForKey(state.labelFont),
+    loadFontForKey(state.itemFont)
   ]);
 
   if (document.fonts && document.fonts.ready) {
@@ -617,7 +627,8 @@ function drawLabel(svg, label) {
     y: label.y,
     size: label.size,
     color: label.color,
-    anchor: label.anchor || "middle"
+    anchor: label.anchor || "middle",
+    fontKind: "label"
   });
 }
 
@@ -629,7 +640,8 @@ function drawVerticalLabel(svg, label) {
     size: label.size,
     color: label.color,
     anchor: label.anchor || "middle",
-    lineGap: 1.05
+    lineGap: 1.05,
+    fontKind: "label"
   });
 }
 
@@ -641,9 +653,15 @@ function drawItem(svg, item) {
 
   if (item.type === "text") {
     if (item.vertical) {
-      drawVerticalText(group, item);
+      drawVerticalText(group, {
+        ...item,
+        fontKind: "item"
+      });
     } else {
-      drawText(group, item);
+      drawText(group, {
+        ...item,
+        fontKind: "item"
+      });
     }
   } else if (item.type === "image") {
     const image = createSvgElement("image");
@@ -752,11 +770,13 @@ function handlePointerMove(event) {
 
 function handlePointerUp(event) {
   if (!drag) return;
+
   try {
     els.chartSvg.releasePointerCapture(event.pointerId);
   } catch {
     // pointer capture may already be released in some browsers
   }
+
   drag = null;
   updateSelectedPanel();
 }
@@ -868,8 +888,15 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, num));
 }
 
+function getFontKey(kind) {
+  if (kind === "title") return state.titleFont;
+  if (kind === "label") return state.labelFont;
+  if (kind === "item") return state.itemFont;
+  return "system";
+}
+
 function getFontStack(kind) {
-  const key = kind === "title" ? state.titleFont : state.bodyFont;
+  const key = getFontKey(kind);
   return FONT_OPTIONS[key]?.stack || FONT_OPTIONS.system.stack;
 }
 
@@ -878,14 +905,17 @@ function getFontWeight(key) {
 }
 
 function drawText(parent, config) {
+  const fontKind = config.fontKind || "item";
+  const fontKey = getFontKey(fontKind);
+
   const text = createSvgElement("text");
   text.textContent = config.text;
   text.setAttribute("x", config.x);
   text.setAttribute("y", config.y);
   text.setAttribute("fill", config.color);
   text.setAttribute("font-size", config.size);
-  text.setAttribute("font-weight", getFontWeight(state.bodyFont));
-  text.setAttribute("font-family", getFontStack("body"));
+  text.setAttribute("font-weight", getFontWeight(fontKey));
+  text.setAttribute("font-family", getFontStack(fontKind));
   text.setAttribute("text-anchor", config.anchor || "middle");
   text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("paint-order", "stroke");
@@ -893,14 +923,17 @@ function drawText(parent, config) {
 }
 
 function drawVerticalText(parent, config) {
+  const fontKind = config.fontKind || "item";
+  const fontKey = getFontKey(fontKind);
+
   const chars = [...(config.text || "")];
   const text = createSvgElement("text");
   text.setAttribute("x", config.x);
   text.setAttribute("y", config.y);
   text.setAttribute("fill", config.color);
   text.setAttribute("font-size", config.size);
-  text.setAttribute("font-weight", getFontWeight(state.bodyFont));
-  text.setAttribute("font-family", getFontStack("body"));
+  text.setAttribute("font-weight", getFontWeight(fontKey));
+  text.setAttribute("font-family", getFontStack(fontKind));
   text.setAttribute("text-anchor", config.anchor || "middle");
   text.setAttribute("dominant-baseline", "middle");
 
@@ -966,6 +999,7 @@ async function prepareSvgString() {
   clone.setAttribute("height", CANVAS.height);
 
   const fontCss = await buildEmbeddedFontCss();
+
   if (fontCss) {
     const defs = createSvgElement("defs");
     const style = createSvgElement("style");
@@ -985,7 +1019,12 @@ async function prepareSvgString() {
 }
 
 async function buildEmbeddedFontCss() {
-  const keys = Array.from(new Set([state.titleFont, state.bodyFont]));
+  const keys = Array.from(new Set([
+    state.titleFont,
+    state.labelFont,
+    state.itemFont
+  ]));
+
   const rules = [];
 
   for (const key of keys) {
