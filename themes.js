@@ -1,6 +1,6 @@
 const THEMES = {
   pinkPop: {
-    name: "Pink Pop",
+    name: "ピンク",
     background: "#ea7e95",
     panel: "#ffffff",
     grid: "#ef9aae",
@@ -8,7 +8,7 @@ const THEMES = {
     title: "#ffffff"
   },
   skyBlue: {
-    name: "Sky Blue",
+    name: "スカイブルー",
     background: "#66a8df",
     panel: "#ffffff",
     grid: "#a9cfee",
@@ -16,7 +16,7 @@ const THEMES = {
     title: "#ffffff"
   },
   night: {
-    name: "Night",
+    name: "ナイトモード",
     background: "#202637",
     panel: "#ffffff",
     grid: "#69708a",
@@ -24,7 +24,7 @@ const THEMES = {
     title: "#ffffff"
   },
   creamRetro: {
-    name: "Cream Retro",
+    name: "クリームレトロ",
     background: "#f1dcc4",
     panel: "#fffaf2",
     grid: "#c89f7d",
@@ -32,7 +32,7 @@ const THEMES = {
     title: "#64442c"
   },
   mint: {
-    name: "Mint",
+    name: "ミント",
     background: "#6fc7b2",
     panel: "#ffffff",
     grid: "#a7ddcf",
@@ -40,7 +40,7 @@ const THEMES = {
     title: "#ffffff"
   },
   monochrome: {
-    name: "Monochrome",
+    name: "モノクロ",
     background: "#f4f4f4",
     panel: "#ffffff",
     grid: "#999999",
