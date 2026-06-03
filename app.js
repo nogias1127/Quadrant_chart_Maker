@@ -1,6 +1,37 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
 const XLINK_NS = "http://www.w3.org/1999/xlink";
 
+const FONT_OPTIONS = {
+  rounded: {
+    name: "丸ゴシック / M PLUS Rounded",
+    stack: '"M PLUS Rounded 1c", system-ui, sans-serif'
+  },
+  zenMaru: {
+    name: "やわらか丸ゴ / Zen Maru Gothic",
+    stack: '"Zen Maru Gothic", "M PLUS Rounded 1c", system-ui, sans-serif'
+  },
+  kiwi: {
+    name: "ゆるめ / Kiwi Maru",
+    stack: '"Kiwi Maru", "M PLUS Rounded 1c", system-ui, sans-serif'
+  },
+  dela: {
+    name: "極太タイトル / Dela Gothic One",
+    stack: '"Dela Gothic One", "M PLUS Rounded 1c", system-ui, sans-serif'
+  },
+  kaisei: {
+    name: "レトロ見出し / Kaisei Decol",
+    stack: '"Kaisei Decol", "M PLUS Rounded 1c", serif'
+  },
+  mincho: {
+    name: "明朝系 / serif",
+    stack: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif'
+  },
+  system: {
+    name: "標準 / system",
+    stack: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif'
+  }
+};
+
 const CANVAS = {
   width: 768,
   height: 1024,
@@ -24,6 +55,8 @@ const DEFAULT_STATE = {
   backgroundColor: "#ea7e95",
   panelColor: "#ffffff",
   gridColor: "#ef9aae",
+  titleFont: "dela",
+  bodyFont: "rounded",
   title: {
     text: "かに",
     x: 384,
@@ -52,6 +85,7 @@ const els = {};
 document.addEventListener("DOMContentLoaded", () => {
   bindElements();
   setupThemeSelect();
+  setupFontSelects();
   bindEvents();
   syncControlsFromState();
   render();
@@ -61,6 +95,8 @@ function bindElements() {
   const ids = [
     "chartSvg",
     "themeSelect",
+    "titleFontSelect",
+    "bodyFontSelect",
     "bgColorInput",
     "titleColorInput",
     "labelColorInput",
@@ -110,8 +146,32 @@ function setupThemeSelect() {
   }
 }
 
+function setupFontSelects() {
+  for (const [key, font] of Object.entries(FONT_OPTIONS)) {
+    const titleOption = document.createElement("option");
+    titleOption.value = key;
+    titleOption.textContent = font.name;
+    els.titleFontSelect.appendChild(titleOption);
+
+    const bodyOption = document.createElement("option");
+    bodyOption.value = key;
+    bodyOption.textContent = font.name;
+    els.bodyFontSelect.appendChild(bodyOption);
+  }
+}
+
 function bindEvents() {
   els.themeSelect.addEventListener("change", applyTheme);
+
+  els.titleFontSelect.addEventListener("change", () => {
+    state.titleFont = els.titleFontSelect.value;
+    render();
+  });
+
+  els.bodyFontSelect.addEventListener("change", () => {
+    state.bodyFont = els.bodyFontSelect.value;
+    render();
+  });
 
   els.bgColorInput.addEventListener("input", () => {
     state.backgroundColor = els.bgColorInput.value;
@@ -266,6 +326,8 @@ function bindEvents() {
 
 function syncControlsFromState() {
   els.themeSelect.value = state.theme;
+  els.titleFontSelect.value = state.titleFont;
+  els.bodyFontSelect.value = state.bodyFont;
   els.bgColorInput.value = state.backgroundColor;
   els.titleColorInput.value = state.title.color;
   els.labelColorInput.value = state.labels.top.color;
@@ -382,7 +444,7 @@ function drawAutoFitTitle(svg) {
   text.setAttribute("fill", state.title.color);
   text.setAttribute("font-size", fit.size);
   text.setAttribute("font-weight", "900");
-  text.setAttribute("font-family", 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif');
+  text.setAttribute("font-family", getFontStack("title"));
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("dominant-baseline", "middle");
 
@@ -725,6 +787,11 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, num));
 }
 
+function getFontStack(kind) {
+  const key = kind === "title" ? state.titleFont : state.bodyFont;
+  return FONT_OPTIONS[key]?.stack || FONT_OPTIONS.system.stack;
+}
+
 function drawText(parent, config) {
   const text = createSvgElement("text");
   text.textContent = config.text;
@@ -733,7 +800,7 @@ function drawText(parent, config) {
   text.setAttribute("fill", config.color);
   text.setAttribute("font-size", config.size);
   text.setAttribute("font-weight", "800");
-  text.setAttribute("font-family", 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif');
+  text.setAttribute("font-family", getFontStack("body"));
   text.setAttribute("text-anchor", config.anchor || "middle");
   text.setAttribute("dominant-baseline", "middle");
   text.setAttribute("paint-order", "stroke");
@@ -748,7 +815,7 @@ function drawVerticalText(parent, config) {
   text.setAttribute("fill", config.color);
   text.setAttribute("font-size", config.size);
   text.setAttribute("font-weight", "800");
-  text.setAttribute("font-family", 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Emoji", "Hiragino Sans", "Yu Gothic", sans-serif');
+  text.setAttribute("font-family", getFontStack("body"));
   text.setAttribute("text-anchor", config.anchor || "middle");
   text.setAttribute("dominant-baseline", "middle");
 
@@ -826,7 +893,11 @@ function downloadSvg() {
   downloadBlob(blob, createFilename("svg"));
 }
 
-function downloadPng() {
+async function downloadPng() {
+  if (document.fonts && document.fonts.ready) {
+    await document.fonts.ready;
+  }
+
   const svgString = prepareSvgString();
   const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
   const url = URL.createObjectURL(svgBlob);
