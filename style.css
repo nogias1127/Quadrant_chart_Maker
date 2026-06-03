@@ -270,20 +270,64 @@ hr {
 }
 
 @media (max-width: 560px) {
-  .app-layout {
-    padding: 10px;
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
-  .app-header {
+  .app-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .control-panel,
+  .preview-area {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .panel-card {
+    width: 100%;
+    max-width: 100%;
     padding: 14px;
+    border-radius: 12px;
+  }
+
+  input,
+  select,
+  button {
+    width: 100%;
+    max-width: 100%;
   }
 
   .two-cols {
     grid-template-columns: 1fr;
   }
 
+  .app-header {
+    padding: 14px;
+  }
+
   .preview-toolbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .svg-shell {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px 12px;
   }
 }
