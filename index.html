@@ -10,7 +10,7 @@
   <header class="app-header">
     <div>
       <h1>Quadrant Chart Maker</h1>
-      <p>四象限画像をブラウザだけで作成できます。配置したい場所をクリック/タップして、文字・絵文字・画像を置けます。</p>
+      <p>四象限画像をブラウザだけで作成できます。配置したい場所をクリック/タップして、文字・絵文字・画像を置けます。<br>■の項目を入力すればだいたいなんとかなります。□はこだわり項目。</p>
     </div>
     <div class="header-actions">
       <button id="downloadPngBtn" class="primary">PNG保存</button>
@@ -28,23 +28,24 @@
         </label>
 
         <label>
-          ■バックグラウンドカラー
+          □バックグラウンドカラー
           <input id="bgColorInput" type="color">
         </label>
-        
-        <div class="two-cols">
-          <label>
-          ■タイトルテキストカラー
-            <input id="titleColorInput" type="color">
-          </label>
-          <label>
-          ■ラベルテキストカラー
-            <input id="labelColorInput" type="color">
-          </label>
-        </div>
+
+        <br>
         
         <label>
-          ■タイトルフォント
+          ■タイトル
+          <input id="titleInput" type="text" value="四象限チャート">
+        </label>
+        
+        <label>
+          □タイトルテキストカラー
+            <input id="titleColorInput" type="color">
+        </label>
+
+        <label>
+          □タイトルのフォント
           <select id="titleFontSelect">
             <option value="dela">Dela Gothic One / 極太</option>
             <option value="mochiy">Mochiy Pop One / ポップ極太</option>
@@ -60,25 +61,11 @@
         </label>
 
         <label>
-          ■ラベル・配置文字フォント
-          <select id="bodyFontSelect">
-            <option value="rounded">M PLUS Rounded 1c / 丸ゴシック</option>
-            <option value="kiwi">Kiwi Maru / ゆる丸</option>
-            <option value="hachi">Hachi Maru Pop / 手書きポップ</option>
-            <option value="kaisei">Kaisei Decol / レトロ</option>
-            <option value="shippori">Shippori Mincho / 明朝</option>
-            <option value="zenAntique">Zen Antique Soft / レトロ明朝</option>
-            <option value="dela">Dela Gothic One / 極太</option>
-            <option value="mochiy">Mochiy Pop One / ポップ極太</option>
-            <option value="rampart">Rampart One / 装飾タイトル</option>
-            <option value="yuji">Yuji Boku / 筆文字</option>
-          </select>
+            □タイトルサイズ
+            <input id="titleSizeInput" type="number" min="20" max="160" value="96">
         </label>
-    
-        <label>
-          ■タイトル
-          <input id="titleInput" type="text" value="四象限チャート">
-        </label>
+        
+        <br>
 
         <label>
           ■上ラベル
@@ -96,25 +83,41 @@
           ■右ラベル
           <input id="rightLabelInput" type="text" value="右寄り">
         </label>
-      </section>
-      
-      　<div class="two-cols">
-          <label>
-            □タイトルサイズ
-            <input id="titleSizeInput" type="number" min="20" max="160" value="96">
-          </label>
+        
+        <label>
+          □ラベルテキストカラー
+            <input id="labelColorInput" type="color">
+        </label>
+        
+        <label>
+          □ラベルのフォント
+          <select id="labelFontSelect">
+            <option value="rounded">M PLUS Rounded 1c / 丸ゴシック</option>
+            <option value="kiwi">Kiwi Maru / ゆる丸</option>
+            <option value="hachi">Hachi Maru Pop / 手書きポップ</option>
+            <option value="kaisei">Kaisei Decol / レトロ</option>
+            <option value="shippori">Shippori Mincho / 明朝</option>
+            <option value="zenAntique">Zen Antique Soft / レトロ明朝</option>
+            <option value="dela">Dela Gothic One / 極太</option>
+            <option value="mochiy">Mochiy Pop One / ポップ極太</option>
+            <option value="rampart">Rampart One / 装飾タイトル</option>
+            <option value="yuji">Yuji Boku / 筆文字</option>
+          </select>
+        </label>
+
           <label>
             □ラベルサイズ
             <input id="labelSizeInput" type="number" min="12" max="80" value="34">
           </label>
         </div>
-
+      </section>
+      
       <section class="panel-card">
         <h2>STEP 02.自CP情報を書き込む</h2>
         ※空欄にしたらプレーンな画像として出力できます
 
         <label>
-          ■追加するテキスト・絵文字
+          ■テキスト・絵文字を追加
           <input id="newTextInput" type="text" value="絵文字も使えるよ🌟">
         </label>
 
@@ -139,7 +142,7 @@
         <hr>
 
         <label>
-          ■追加する画像
+          ■画像を追加
           <input id="imageInput" type="file" accept="image/*">
         </label>
 
