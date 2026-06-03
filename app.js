@@ -240,10 +240,11 @@ function bindEvents() {
     render();
   });
 
-  els.bgColorInput.addEventListener("input", () => {
-    state.backgroundColor = els.bgColorInput.value;
-    render();
-  });
+els.bgColorInput.addEventListener("input", () => {
+  state.backgroundColor = els.bgColorInput.value;
+  state.gridColor = els.bgColorInput.value;
+  render();
+});
 
   els.titleColorInput.addEventListener("input", () => {
     state.title.color = els.titleColorInput.value;
