@@ -10,6 +10,15 @@ const CANVAS = {
   plotH: 620
 };
 
+const TITLE_BOX = {
+  x: 24,
+  y: 36,
+  width: 720,
+  height: 200,
+  minSize: 8,
+  lineHeight: 1.08
+};
+
 const DEFAULT_STATE = {
   theme: "pinkPop",
   backgroundColor: "#ea7e95",
@@ -17,8 +26,8 @@ const DEFAULT_STATE = {
   gridColor: "#ef9aae",
   title: {
     text: "かに",
-    x: 112,
-    y: 120,
+    x: 384,
+    y: 136,
     size: 108,
     color: "#ffffff"
   },
@@ -316,9 +325,8 @@ function render() {
 
   appendRect(svg, 0, 0, CANVAS.width, CANVAS.height, state.backgroundColor);
 
-  drawDecorations(svg);
   drawBaseChart(svg);
-  drawText(svg, state.title);
+  drawAutoFitTitle(svg);
   drawLabel(svg, state.labels.top);
   drawLabel(svg, state.labels.bottom);
   drawVerticalLabel(svg, state.labels.left);
@@ -329,42 +337,6 @@ function render() {
   }
 
   drawSelection(svg);
-}
-
-function drawDecorations(svg) {
-  const group = createSvgElement("g");
-  group.setAttribute("opacity", "0.95");
-
-  // Simple decorative sun/crab-like icons, intentionally generic.
-  appendCircle(group, 610, 76, 36, state.title.color);
-  for (let i = 0; i < 10; i++) {
-    const angle = (Math.PI * 2 * i) / 10;
-    appendLine(
-      group,
-      610 + Math.cos(angle) * 48,
-      76 + Math.sin(angle) * 48,
-      610 + Math.cos(angle) * 64,
-      76 + Math.sin(angle) * 64,
-      state.title.color,
-      5
-    );
-  }
-
-  appendCircle(group, 708, 112, 21, state.title.color);
-  for (let i = 0; i < 8; i++) {
-    const angle = (Math.PI * 2 * i) / 8;
-    appendLine(
-      group,
-      708 + Math.cos(angle) * 30,
-      112 + Math.sin(angle) * 30,
-      708 + Math.cos(angle) * 40,
-      112 + Math.sin(angle) * 40,
-      state.title.color,
-      4
-    );
-  }
-
-  svg.appendChild(group);
 }
 
 function drawBaseChart(svg) {
@@ -389,6 +361,110 @@ function drawBaseChart(svg) {
     state.gridColor,
     2
   );
+}
+
+function drawAutoFitTitle(svg) {
+  const rawText = state.title.text || "";
+  const baseSize = clampNumber(state.title.size, 20, 160, 108);
+
+  const fit = calculateAutoFitLines({
+    text: rawText,
+    maxWidth: TITLE_BOX.width,
+    maxHeight: TITLE_BOX.height,
+    baseSize,
+    minSize: TITLE_BOX.minSize,
+    lineHeight: TITLE_BOX.lineHeight
+  });
+
+  const text = createSvgElement("text");
+  text.setAttribute("x", TITLE_BOX.x + TITLE_BOX.width / 2);
+  text.setAttribute("y", TITLE_BOX.y + TITLE_BOX.height / 2 - ((fit.lines.length - 1) * fit.size * TITLE_BOX.lineHeight) / 2);
+  text.setAttribute("fill", state.title.color);
+  text.setAttribute("font-size", fit.size);
+  text.setAttribute("font-weight", "900");
+  text.setAttribute("font-family", 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif');
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("dominant-baseline", "middle");
+
+  fit.lines.forEach((line, index) => {
+    const tspan = createSvgElement("tspan");
+    tspan.textContent = line;
+    tspan.setAttribute("x", TITLE_BOX.x + TITLE_BOX.width / 2);
+    tspan.setAttribute("dy", index === 0 ? 0 : fit.size * TITLE_BOX.lineHeight);
+    text.appendChild(tspan);
+  });
+
+  svg.appendChild(text);
+}
+
+function calculateAutoFitLines({ text, maxWidth, maxHeight, baseSize, minSize, lineHeight }) {
+  const normalizedText = String(text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  for (let size = baseSize; size >= minSize; size -= 1) {
+    const lines = wrapTextToWidth(normalizedText, maxWidth, size);
+    const totalHeight = lines.length * size * lineHeight;
+
+    if (totalHeight <= maxHeight) {
+      return { lines, size };
+    }
+  }
+
+  return {
+    lines: wrapTextToWidth(normalizedText, maxWidth, minSize),
+    size: minSize
+  };
+}
+
+function wrapTextToWidth(text, maxWidth, fontSize) {
+  const sourceLines = text.split("\n");
+  const result = [];
+
+  for (const sourceLine of sourceLines) {
+    const chars = [...sourceLine];
+
+    if (chars.length === 0) {
+      result.push("");
+      continue;
+    }
+
+    let current = "";
+
+    for (const char of chars) {
+      const candidate = current + char;
+      const candidateWidth = estimateTextWidth(candidate, fontSize);
+
+      if (candidateWidth <= maxWidth || current.length === 0) {
+        current = candidate;
+      } else {
+        result.push(current);
+        current = char;
+      }
+    }
+
+    if (current) {
+      result.push(current);
+    }
+  }
+
+  return result.length ? result : [""];
+}
+
+function estimateTextWidth(text, fontSize) {
+  let units = 0;
+
+  for (const char of [...text]) {
+    if (char === " ") {
+      units += 0.34;
+    } else if (/[\u0000-\u007f]/.test(char)) {
+      units += 0.58;
+    } else if (/\p{Extended_Pictographic}/u.test(char)) {
+      units += 1.08;
+    } else {
+      units += 1.0;
+    }
+  }
+
+  return units * fontSize;
 }
 
 function drawLabel(svg, label) {
@@ -699,16 +775,6 @@ function appendRect(parent, x, y, width, height, fill) {
   rect.setAttribute("fill", fill);
   parent.appendChild(rect);
   return rect;
-}
-
-function appendCircle(parent, cx, cy, r, fill) {
-  const circle = createSvgElement("circle");
-  circle.setAttribute("cx", cx);
-  circle.setAttribute("cy", cy);
-  circle.setAttribute("r", r);
-  circle.setAttribute("fill", fill);
-  parent.appendChild(circle);
-  return circle;
 }
 
 function appendLine(parent, x1, y1, x2, y2, stroke, strokeWidth) {
